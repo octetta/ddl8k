@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Definitions for gradients -->
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4fd1c5" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="headphoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Glowing Soundwaves (Delay Effect) -->
+  <g stroke="#8b5cf6" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.3">
+    <circle cx="250" cy="250" r="160" />
+    <circle cx="250" cy="250" r="190" />
+    <circle cx="250" cy="250" r="220" />
+  </g>
+  <g stroke="#4fd1c5" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5">
+    <circle cx="250" cy="250" r="175" stroke-dasharray="10 15" />
+    <circle cx="250" cy="250" r="205" stroke-dasharray="5 20" />
+  </g>
+
+  <!-- Octopus Body -->
+  <path d="M 180 200 C 180 120, 320 120, 320 200 C 320 260, 290 300, 250 300 C 210 300, 180 260, 180 200 Z" fill="url(#bodyGrad)" />
+  
+  <!-- Tentacles -->
+  <path d="M 190 280 Q 140 330, 120 280 Q 150 250, 180 280" fill="url(#bodyGrad)" />
+  <path d="M 220 295 Q 180 380, 170 330 Q 200 300, 220 295" fill="url(#bodyGrad)" />
+  <path d="M 280 295 Q 320 380, 330 330 Q 300 300, 280 295" fill="url(#bodyGrad)" />
+  <path d="M 310 280 Q 360 330, 380 280 Q 350 250, 320 280" fill="url(#bodyGrad)" />
+
+  <!-- Tentacle Suction Cups -->
+  <circle cx="150" cy="285" r="5" fill="#fef08a" />
+  <circle cx="130" cy="280" r="3" fill="#fef08a" />
+  <circle cx="185" cy="335" r="5" fill="#fef08a" />
+  <circle cx="170" cy="325" r="4" fill="#fef08a" />
+  <circle cx="315" cy="335" r="5" fill="#fef08a" />
+  <circle cx="330" cy="325" r="4" fill="#fef08a" />
+  <circle cx="350" cy="285" r="5" fill="#fef08a" />
+  <circle cx="370" cy="280" r="3" fill="#fef08a" />
+
+  <!-- Eyes -->
+  <circle cx="225" cy="210" r="12" fill="#ffffff" />
+  <circle cx="275" cy="210" r="12" fill="#ffffff" />
+  <circle cx="225" cy="212" r="6" fill="#0f172a" />
+  <circle cx="275" cy="212" r="6" fill="#0f172a" />
+  <circle cx="227" cy="210" r="2" fill="#ffffff" />
+  <circle cx="277" cy="210" r="2" fill="#ffffff" />
+
+  <!-- Cute Smile -->
+  <path d="M 240 230 Q 250 240, 260 230" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Headphones -->
+  <!-- Band -->
+  <path d="M 155 200 C 155 100, 345 100, 345 200" fill="none" stroke="url(#headphoneGrad)" stroke-width="14" stroke-linecap="round" />
+  <path d="M 155 200 C 155 100, 345 100, 345 200" fill="none" stroke="#fef08a" stroke-width="4" stroke-linecap="round" />
+  <!-- Earcups -->
+  <rect x="140" y="170" width="30" height="60" rx="10" fill="url(#headphoneGrad)" />
+  <rect x="330" y="170" width="30" height="60" rx="10" fill="url(#headphoneGrad)" />
+  <!-- Earcup Accents -->
+  <circle cx="155" cy="200" r="8" fill="#4fd1c5" />
+  <circle cx="345" cy="200" r="8" fill="#4fd1c5" />
+
+  <!-- Music Notes -->
+  <g fill="#4fd1c5">
+    <path d="M 110 130 L 110 160 A 8 8 0 1 1 95 160 L 95 130 L 120 125 L 120 155 A 8 8 0 1 1 105 155 L 105 125 Z" transform="rotate(-15 110 130)" />
+    <path d="M 390 140 L 390 165 A 6 6 0 1 1 380 165 L 380 140 L 400 135 L 400 160 A 6 6 0 1 1 390 160 L 390 135 Z" transform="rotate(20 390 140)" />
+  </g>
+</svg>

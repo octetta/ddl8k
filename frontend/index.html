@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ddl8k</title>
+</head>
+<body>
+    <div id="app">
+        <!-- GLOBAL WINDOW -->
+        <div class="draggable-win" id="global-window">
+            <div id="global-header" class="window-header">
+                <span>Global Settings</span>
+                <div class="header-controls">
+                    <button class="window-minimize icon-btn" title="Minimize">−</button>
+                    <button id="theme-toggle" class="icon-btn" title="Toggle Theme">🌓</button>
+                </div>
+            </div>
+            
+            <div class="window-content">
+                <div class="control-group">
+                    <label>Presets</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <select id="preset-select" class="glass-select" style="flex-grow:1; margin-top:0;">
+                        </select>
+                        <button id="rename-preset-btn" class="glass-btn">Rename</button>
+                        <button id="save-presets-btn" class="glass-btn">Save</button>
+                        <button id="load-presets-btn" class="glass-btn">Load</button>
+                        <input type="file" id="preset-file" style="display:none;" accept=".json">
+                    </div>
+                </div>
+
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Input Channel</label>
+                        <select id="input-select" class="glass-select"></select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Output Channel</label>
+                        <select id="output-select" class="glass-select"></select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: flex-end; margin-top: 10px;">
+                    <div class="control-group" style="width: 140px;">
+                        <button id="toggle-btn" class="glass-btn primary" style="height: 42px; font-size: 1rem;">▶ Start Delay</button>
+                    </div>
+                    
+                    <div class="control-group" style="flex-grow: 1;">
+                        <label style="font-size: 0.8rem;">Main Volume <span class="val-display" style="font-size: 0.9rem;">-20 dB</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="V {val}" min="-30" max="10" step="1" value="-20" data-suffix=" dB" data-no-preset="true">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELAY CONTROLS WINDOW -->
+        <div class="draggable-win" id="controls-window">
+            <div id="controls-header" class="window-header">
+                <span>Delay Controls</span>
+                <div class="header-controls">
+                    <button class="window-minimize icon-btn" title="Minimize">−</button>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Input Volume <span class="val-display">0 dB</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 a{val} l1" min="-20" max="30" step="1" value="0" data-suffix=" dB" data-no-preset="true">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Send (ds) <span class="val-display">0.7</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 ds {val}" min="0" max="1" step="0.01" value="0.7">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Coarse <span class="val-display">4</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 {val}" min="0" max="7" step="1" value="4">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Fine <span class="val-display">8</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 - {val}" min="0" max="15" step="1" value="8">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Feedback <span class="val-display">6</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 - - {val}" min="0" max="15" step="1" value="6">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Mod Freq <span class="val-display">0</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 - - - {val}" min="0" max="31" step="1" value="0">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Mod Depth <span class="val-display">0</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 - - - - {val}" min="0" max="31" step="1" value="0">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Delay Level <span class="val-display">12</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="DL 1 - - - - - {val}" min="0" max="15" step="1" value="12">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Filter Mode (J)</label>
+                        <select class="glass-select skode-control" data-skode="v0 J{val}">
+                            <option value="0">Off</option>
+                            <option value="1" selected>Low Pass (LPF)</option>
+                            <option value="2">High Pass (HPF)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Cutoff Freq (K) <span class="val-display">15000 Hz</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 K{val}" min="20" max="20000" step="10" value="15000" data-suffix=" Hz">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Resonance (Q) <span class="val-display">0.707</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 Q{val}" min="0.1" max="10" step="0.001" value="0.707">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Bit Crush (q) <span class="val-display">0 bits</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 q{val}" min="0" max="32" step="1" value="0" data-suffix=" bits">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Sample & Hold (h) <span class="val-display">0</span></label>
+                        <input type="range" class="glass-slider skode-control" data-skode="v0 h{val}" min="0" max="2" step="0.01" value="0">
+                    </div>
+                </div>
+
+                <div class="controls-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+                    <label class="toggle-container">
+                        <input type="checkbox" id="freeze-check" class="skode-control skode-checkbox" data-skode="DF 1 {val}">
+                        <div class="toggle-btn">❄ Freeze</div>
+                    </label>
+                    <label class="toggle-container">
+                        <input type="checkbox" id="pingpong-check" class="skode-control skode-checkbox" data-skode="DP 1 {val}">
+                        <div class="toggle-btn">⟷ Ping-Pong</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILE MANAGER WINDOW -->
+        <div class="draggable-win" id="file-window">
+            <div id="file-header" class="window-header">
+                <span>File Manager</span>
+                <div class="header-controls">
+                    <button class="window-minimize icon-btn" title="Minimize">−</button>
+                </div>
+            </div>
+            <div class="window-content" style="gap: 20px;">
+                <div class="control-group">
+                    <label>Change Directory (%cd)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="cd-input" class="glass-select" style="flex-grow:1; cursor:text;" placeholder="/path/to/dir">
+                        <button id="cd-browse-btn" class="glass-btn">Browse</button>
+                        <button id="cd-btn" class="glass-btn primary">Go</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Mount Zip (%z)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="zip-input" class="glass-select" style="flex-grow:1; cursor:text;" placeholder="/path/to/file.zip">
+                        <button id="zip-browse-btn" class="glass-btn">Browse</button>
+                        <button id="zip-btn" class="glass-btn primary">Mount</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ABOUT WINDOW -->
+        <div class="draggable-win" id="about-window">
+            <div id="about-header" class="window-header">
+                <span>About</span>
+                <div class="header-controls">
+                    <button class="window-minimize icon-btn" title="Minimize">−</button>
+                </div>
+            </div>
+            <div class="window-content" style="gap: 15px; font-size: 0.85rem; padding: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="/src/assets/bg.jpg" alt="Octopus Mascot" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <strong style="color: var(--primary); font-size: 1.1rem;">DDL8k v0.1.0</strong>
+                        <span id="skred-ver-display" style="opacity: 0.8;">Skred Version: Loading...</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <strong>Created by Octetta</strong>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="#" class="about-link" data-url="https://github.com/octetta">GitHub</a>
+                        <a href="#" class="about-link" data-url="https://youtube.com/@octetta">YouTube</a>
+                        <a href="#" class="about-link" data-url="https://octetta.com">octetta.com</a>
+                        <a href="#" class="about-link" data-url="https://linkedin.com/in/octetta">LinkedIn</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                    <strong>Open Source Credits</strong>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="#" class="about-link" data-url="https://wails.io">Wails</a>
+                        <a href="#" class="about-link" data-url="https://go.dev">Go</a>
+                        <a href="#" class="about-link" data-url="https://ziglang.org">Zig</a>
+                        <a href="#" class="about-link" data-url="https://miniaud.io">Miniaudio</a>
+                        <a href="#" class="about-link" data-url="https://zlib.net">zlib</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Console Window (REPL) -->
+    <div id="console-overlay" class="draggable-win console-overlay">
+        <div id="console-header" class="window-header">
+            <span>Skode REPL</span>
+            <div class="header-controls">
+                <button class="window-minimize icon-btn" title="Minimize">−</button>
+            </div>
+        </div>
+        <div class="console-body">
+            <div id="console-output" class="console-output"></div>
+            <div class="console-input-wrap">
+                <span>&gt;</span>
+                <input type="text" id="console-input" class="console-input" autocomplete="off" spellcheck="false" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Rename Modal -->
+    <div id="rename-modal" class="draggable-win" style="display:none; z-index:2000; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: auto; min-width: unset; min-height: unset; position: fixed; padding-bottom: 0;">
+        <div class="window-header" style="cursor: default;">
+            <span>Rename Preset</span>
+            <button id="rename-close" class="window-close">&times;</button>
+        </div>
+        <div class="window-content" style="padding: 15px;">
+            <input type="text" id="rename-input" class="glass-select" style="width: 100%; cursor:text;" />
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px; gap: 10px;">
+                <button id="rename-cancel" class="glass-btn" style="padding: 6px 12px;">Cancel</button>
+                <button id="rename-confirm" class="glass-btn primary" style="padding: 6px 12px;">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
