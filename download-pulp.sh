@@ -13,9 +13,14 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
     fi
 fi
 
-# Map Darwin to macOS for the release asset name
+# Map Darwin to macOS
 if [ "$OS" = "darwin" ]; then
     OS="macos"
+fi
+
+# Map Windows environments
+if [[ "$OS" == mingw* ]] || [[ "$OS" == msys* ]] || [[ "$OS" == cygwin* ]]; then
+    OS="windows"
 fi
 
 ASSET="skred-${VERSION}-maxed-${OS}-${ARCH}.tar.gz"

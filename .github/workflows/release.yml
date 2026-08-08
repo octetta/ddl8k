@@ -73,6 +73,7 @@ jobs:
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: |
+          ./download-pulp.sh
           wails build -platform linux/amd64 -m
           mkdir -p pkg/ddl8k-${{ steps.ver.outputs.version }}-linux-x86_64
           cp build/bin/ddl8k pkg/ddl8k-${{ steps.ver.outputs.version }}-linux-x86_64/
@@ -82,6 +83,7 @@ jobs:
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: |
+          ./download-pulp.sh
           export MACOSX_DEPLOYMENT_TARGET=11.0
           wails build -platform darwin/universal -m
           mkdir -p pkg/ddl8k-${{ steps.ver.outputs.version }}-macos-universal
@@ -92,6 +94,7 @@ jobs:
       - name: Build (Windows)
         if: runner.os == 'Windows'
         run: |
+          bash ./download-pulp.sh
           wails build -platform windows/amd64 -m
           mkdir -p pkg/ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64
           cp build/bin/ddl8k.exe pkg/ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64/
