@@ -1,5 +1,5 @@
 import './style.css';
-import { GetSkredVersion, GetAudioInputs, GetAudioOutputs, StartDelayEngine, StopDelayEngine, SendSkodeCommand, ChangeAudioDevice, SaveConfig, LoadConfig, OpenDirectoryDialog, OpenFileDialog } from '../wailsjs/go/main/App';
+import { GetSkredVersion, GetAudioInputs, GetAudioOutputs, RefreshAudioDevices, StartDelayEngine, StopDelayEngine, SendSkodeCommand, ChangeAudioDevice, SaveConfig, LoadConfig, OpenDirectoryDialog, OpenFileDialog } from '../wailsjs/go/main/App';
 import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
 
 let isRunning = false;
@@ -11,6 +11,9 @@ async function loadDevices() {
 
         const inputSelect = document.getElementById('input-select') as HTMLSelectElement;
         const outputSelect = document.getElementById('output-select') as HTMLSelectElement;
+
+        inputSelect.innerHTML = '';
+        outputSelect.innerHTML = '';
 
         inputs.forEach(d => {
             const opt = document.createElement('option');
@@ -241,6 +244,10 @@ document.getElementById('preset-file')!.addEventListener('change', (e) => {
 
 document.getElementById('input-select')!.addEventListener('change', changeDevice);
 document.getElementById('output-select')!.addEventListener('change', changeDevice);
+document.getElementById('refresh-devices-btn')!.addEventListener('click', async () => {
+    await RefreshAudioDevices();
+    await loadDevices();
+});
 document.getElementById('toggle-btn')!.addEventListener('click', toggleEngine);
 
 // Generic Data-Driven UI Event Listener

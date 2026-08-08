@@ -18,6 +18,8 @@ export function OpenDirectoryDialog():Promise<string>;
 
 export function OpenFileDialog():Promise<string>;
 
+export function RefreshAudioDevices():Promise<void>;
+
 export function SaveConfig(arg1:string):Promise<void>;
 
 export function SendSkodeCommand(arg1:string):Promise<string>;

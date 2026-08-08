@@ -40,6 +40,11 @@ func (a *App) GetAudioOutputs() []Device {
 	return GetAudioDevices(false)
 }
 
+// RefreshAudioDevices triggers a hardware rescan
+func (a *App) RefreshAudioDevices() {
+	RefreshAudioDevices()
+}
+
 // StartDelayEngine initializes audio and skode processing
 func (a *App) StartDelayEngine(inputIdx, outputIdx int) string {
 	err := StartAudioEngine()

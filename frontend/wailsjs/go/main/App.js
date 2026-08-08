@@ -34,6 +34,10 @@ export function OpenFileDialog() {
   return window['go']['main']['App']['OpenFileDialog']();
 }
 
+export function RefreshAudioDevices() {
+  return window['go']['main']['App']['RefreshAudioDevices']();
+}
+
 export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
 }

@@ -19,6 +19,11 @@ type Device struct {
 	Name  string `json:"name"`
 }
 
+// RefreshAudioDevices prompts miniaudio/skred to rescan hardware
+func RefreshAudioDevices() {
+	C.skred_audio_refresh()
+}
+
 func GetAudioDevices(isCapture bool) []Device {
 	cIsCapture := C.int(0)
 	if isCapture {
