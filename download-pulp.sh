@@ -24,6 +24,9 @@ if [[ "$OS" == mingw* ]] || [[ "$OS" == msys* ]] || [[ "$OS" == cygwin* ]]; then
 fi
 
 ASSET="skred-${VERSION}-maxed-${OS}-${ARCH}.tar.gz"
+if [ "$OS" = "windows" ]; then
+    ASSET="skred-${VERSION}-maxed-${OS}-${ARCH}.zip"
+fi
 URL="https://github.com/octetta/pulp/releases/download/v${VERSION}/${ASSET}"
 EXTRACT_DIR="clib/pulp"
 
@@ -33,7 +36,16 @@ mkdir -p "$EXTRACT_DIR"
 curl -fLO "$URL" || { echo "Failed to download $URL"; exit 1; }
 
 echo "Extracting ${ASSET}..."
-tar -xzf "$ASSET" -C "$EXTRACT_DIR" --strip-components=1
+if [ "$OS" = "windows" ]; then
+    unzip -q -o "$ASSET" -d "$EXTRACT_DIR"
+    # Pulp's zip might have a root folder inside it. If so, move its contents up.
+    if [ -d "$EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}" ]; then
+        mv $EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}/* "$EXTRACT_DIR/"
+        rm -rf "$EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}"
+    fi
+else
+    tar -xzf "$ASSET" -C "$EXTRACT_DIR" --strip-components=1
+fi
 rm "$ASSET"
 
 echo "Pulp downloaded and extracted to ${EXTRACT_DIR}!"
