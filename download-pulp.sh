@@ -38,10 +38,12 @@ curl -fLO "$URL" || { echo "Failed to download $URL"; exit 1; }
 echo "Extracting ${ASSET}..."
 if [ "$OS" = "windows" ]; then
     unzip -q -o "$ASSET" -d "$EXTRACT_DIR"
-    # Pulp's zip might have a root folder inside it. If so, move its contents up.
-    if [ -d "$EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}" ]; then
-        mv $EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}/* "$EXTRACT_DIR/"
-        rm -rf "$EXTRACT_DIR/skred-${VERSION}-maxed-${OS}-${ARCH}"
+    # Pulp's zip might have a differently named root folder. 
+    # Just move whatever directory was extracted up one level.
+    SUBDIR=$(find "$EXTRACT_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+    if [ -n "$SUBDIR" ]; then
+        mv "$SUBDIR"/* "$EXTRACT_DIR/"
+        rm -rf "$SUBDIR"
     fi
 else
     tar -xzf "$ASSET" -C "$EXTRACT_DIR" --strip-components=1
