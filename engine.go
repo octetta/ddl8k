@@ -2,7 +2,9 @@ package main
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/clib/pulp/include
-#cgo LDFLAGS: ${SRCDIR}/clib/pulp/lib64/libapi.a -lasound -ldl -lpthread -lm
+#cgo linux LDFLAGS: ${SRCDIR}/clib/pulp/lib/libapi.a -lasound -ldl -lpthread -lm
+#cgo darwin LDFLAGS: ${SRCDIR}/clib/pulp/lib/libapi.a -framework CoreAudio -framework CoreFoundation -framework AudioUnit -framework AudioToolbox -lpthread -lm
+#cgo windows LDFLAGS: ${SRCDIR}/clib/pulp/lib/libapi.a -lwinmm -lole32 -luser32 -lm
 #include <skred/api.h>
 #include <stdlib.h>
 */

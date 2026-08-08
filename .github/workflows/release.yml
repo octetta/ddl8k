@@ -73,6 +73,8 @@ jobs:
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libasound2-dev
           ./download-pulp.sh
           wails build -platform linux/amd64 -m
           mkdir -p pkg/ddl8k-${{ steps.ver.outputs.version }}-linux-x86_64
