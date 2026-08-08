@@ -3,14 +3,14 @@
   <img src="mascot.png" width="128" alt="DDL8k Mascot">
 </p>
 
-`ddl8k` is a GUI frontend for the Skode Delay Engine. It provides a modular, fully interactive, multi-window UI allowing complete control over delay routing, audio device selection, global configurations, file management, and deep Skode REPL interaction.
+`ddl8k` is a GUI frontend for the Skode Delay Engine which was inspired by the DW-8000 effects section. It provides a modular, fully interactive, multi-window UI allowing complete control over delay routing, audio device selection, global configurations, file management, and deep Skode REPL interaction.
 
 Built with Wails v2, Vue/Vanilla TS, and standard OS native UI bridges.
 
 ## Features
 
 - **Multi-Window Modular Workspace:** Four distinct floating windows (Global Settings, Delay Controls, File Manager, and REPL) that remember their positions and minimized states across restarts.
-- **Skode REPL Console:** Deep integration with the Skode engine via `Ctrl+backtick` allowing manual commands (`%cd`, `%z`, `DL 1`, `v0`, etc.) with full syntax highlighting for commands vs responses.
+- **Skode REPL Console:** Deep integration with the Skode engine via `ctrl+backtick` allowing manual commands (`%cd`, `%z`, `DL 1`, `v0`, etc.) with full syntax highlighting for commands vs responses.
 - **Preset Management:** Up to 8 preset slots (4 Factory, 4 User) supporting rename overrides and direct export/import via JSON.
 - **Audio Device Swapping:** Safely hot-swap your local audio inputs and outputs right from the UI without restarting the server.
 - **Cross-Platform:** Out of the box native binaries for macOS, Linux, and Windows with no external dependencies (static builds, app bundles).
