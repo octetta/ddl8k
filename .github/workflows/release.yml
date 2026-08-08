@@ -101,7 +101,7 @@ jobs:
           mkdir -p pkg/ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64
           cp build/bin/ddl8k.exe pkg/ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64/
           cd pkg
-          zip -q -r ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64.zip ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64
+          powershell -command "Compress-Archive -Path ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64 -DestinationPath ddl8k-${{ steps.ver.outputs.version }}-windows-x86_64.zip"
 
       - name: Prepare Artifacts
         run: |
