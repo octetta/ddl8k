@@ -1,4 +1,7 @@
 # DDL8k
+<p align="center">
+  <img src="mascot.png" width="128" alt="DDL8k Mascot">
+</p>
 
 DDL8k is a premium GUI frontend for the Skode Delay Engine. It provides a modular, fully interactive, multi-window UI allowing complete control over delay routing, audio device selection, global configurations, file management, and deep Skode REPL interaction.
 
