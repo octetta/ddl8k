@@ -93,7 +93,7 @@ let presets: Preset[] = [
     { name: "Slapback", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"8", "DL 1 - - {val}":"0", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"10", "ds v0 {val}":"0.8", "v0 J{val}":"0", "UI_cutoffRange":"full", "v0 K{val}":"15000", "v0 Q{val}":"0.707"} },
     { name: "Tape/Dub Echo", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"2", "DL 1 - - - - {val}":"4", "DL 1 - - - - - {val}":"11", "ds v0 {val}":"0.7", "v0 J{val}":"11", "UI_cutoffRange":"mids", "v0 K{val}":"2000", "v0 Q{val}":"1.2", "v0 q{val}":"0", "DP 1 {val}":"0"} },
     { name: "Ambient Wash", readonly: true, values: {"DL 1 {val}":"5", "DL 1 - {val}":"10", "DL 1 - - {val}":"14", "DL 1 - - - {val}":"3", "DL 1 - - - - {val}":"10", "DL 1 - - - - - {val}":"9", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"treble", "v0 K{val}":"4000", "v0 Q{val}":"0.5", "DP 1 {val}":"0"} },
-    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"2", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"20", "DL 1 - - - - {val}":"28", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.9", "v0 J{val}":"23", "UI_cutoffRange":"mids", "v0 K{val}":"1200", "v0 Q{val}":"4.5", "v0 q{val}":"4"} },
+    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"2", "DL 1 - {val}":"0", "DL 1 - - {val}":"13", "DL 1 - - - {val}":"8", "DL 1 - - - - {val}":"15", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.8", "v0 J{val}":"13", "UI_cutoffRange":"mids", "v0 K{val}":"800", "v0 Q{val}":"3.5", "v0 q{val}":"0"} },
     { name: "Phase-Shifted Chorus", readonly: true, values: {"DL 1 {val}":"0", "DL 1 - {val}":"3", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"12", "DL 1 - - - - {val}":"22", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.8", "v0 J{val}":"5", "UI_cutoffRange":"full", "v0 K{val}":"2000", "v0 Q{val}":"0.7", "v0 q{val}":"0", "DP 1 {val}":"0"} },
     { name: "Lo-Fi Telephone", readonly: true, values: {"DL 1 {val}":"3", "DL 1 - {val}":"0", "DL 1 - - {val}":"3", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"1.0", "v0 J{val}":"3", "UI_cutoffRange":"mids", "v0 K{val}":"1500", "v0 Q{val}":"1.5", "v0 q{val}":"10", "DP 1 {val}":"0"} },
     { name: "Infinite Drone", readonly: true, values: {"DL 1 {val}":"7", "DL 1 - {val}":"15", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"bass", "v0 K{val}":"250", "v0 Q{val}":"0.9", "DP 1 {val}":"0"} },
@@ -560,7 +560,7 @@ async function restoreGlobalConfig() {
         setWin('global-window', config.globalWindow, '540px', '280px');
         setWin('controls-window', config.controlsWindow, '640px', '600px');
         setWin('file-window', config.fileWindow, '480px', '220px');
-        setWin('about-window', config.aboutWindow, '360px', '320px');
+        setWin('about-window', config.aboutWindow, '360px', '460px');
         setWin('console-overlay', config.replWindow, '500px', '400px');
         
         if (config.volumes) {
@@ -676,10 +676,12 @@ consoleInput.addEventListener('keydown', async (e) => {
                 addOutput(res, false);
                 if (cmd.startsWith('.restart') || cmd.startsWith('-restart')) {
                     if (isRunning) {
-                        const inputIdx = parseInt((document.getElementById('input-select') as HTMLSelectElement).value);
-                        const outputIdx = parseInt((document.getElementById('output-select') as HTMLSelectElement).value);
-                        const msg = await ChangeAudioDevice(inputIdx, outputIdx);
-                        addOutput(`--- ${msg} ---`, false);
+                        isRunning = false;
+                        const btn = document.getElementById('toggle-btn') as HTMLButtonElement;
+                        btn.innerText = '▶ Start Delay';
+                        btn.classList.remove('active');
+                        await StopDelayEngine();
+                        addOutput(`--- Engine Stopped for Configuration ---`, false);
                     }
                 }
             } catch (err) {
@@ -712,7 +714,7 @@ consoleInput.addEventListener('keydown', async (e) => {
 document.querySelectorAll('.about-link').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
-        const url = (e.target as HTMLElement).getAttribute('data-url');
+        const url = (e.currentTarget as HTMLElement).getAttribute('data-url');
         if (url) BrowserOpenURL(url);
     });
 });
