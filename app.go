@@ -214,3 +214,21 @@ func (a *App) GetSkredParameters() string {
 
 	return fmt.Sprintf("Environment -> port: %s | frames: %s | voices: %s", port, frames, voices)
 }
+
+// beforeClose intercepts the window close event
+func (a *App) beforeClose(ctx context.Context) (prevent bool) {
+	dialog, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+		Type:          runtime.QuestionDialog,
+		Title:         "Quit ddl8k?",
+		Message:       "Are you sure you want to quit?",
+		DefaultButton: "No",
+	})
+	
+	if err != nil {
+		return false
+	}
+	
+	// If the user clicked "Yes", prevent is false (close allowed).
+	// If they clicked "No" or closed the dialog, prevent is true (close cancelled).
+	return dialog != "Yes"
+}

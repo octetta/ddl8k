@@ -7,10 +7,10 @@
 </head>
 <body>
     <div id="app">
-        <!-- GLOBAL WINDOW -->
-        <div class="draggable-win" id="global-window">
+        <!-- GLOBAL SETTINGS WINDOW -->
+        <div class="draggable-win" id="global-window" style="top: 15px; left: 15px;">
             <div id="global-header" class="window-header">
-                <span>Global Settings</span>
+                <span>Global Settings <span id="save-indicator" style="opacity: 0; font-size: 10px; margin-left: 10px; transition: opacity 0.3s; color: var(--accent);">✓ Auto-saved</span></span>
                 <div class="header-controls">
                     <button class="window-minimize icon-btn" title="Minimize">−</button>
                     <button id="theme-toggle" class="icon-btn" title="Toggle Theme">🌓</button>
@@ -57,7 +57,7 @@
         </div>
 
         <!-- DELAY CONTROLS WINDOW -->
-        <div class="draggable-win" id="controls-window">
+        <div class="draggable-win" id="controls-window" style="top: 15px; left: 565px;">
             <div id="controls-header" class="window-header">
                 <span>Delay Controls</span>
                 <div class="header-controls">
@@ -106,6 +106,29 @@
                         <input type="range" class="glass-slider skode-control" data-skode="DL 1 - - - - - {val}" min="0" max="15" step="1" value="12">
                     </div>
 
+                </div>
+
+                <div class="controls-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px; margin-top: 15px;">
+                    <label class="toggle-container">
+                        <input type="checkbox" id="freeze-check" class="skode-control skode-checkbox" data-skode="DF 1 {val}">
+                        <div class="toggle-btn">❄ Freeze</div>
+                    </label>
+                    <label class="toggle-container">
+                        <input type="checkbox" id="pingpong-check" class="skode-control skode-checkbox" data-skode="DP 1 {val}">
+                        <div class="toggle-btn">⟷ Ping-Pong</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER WINDOW -->
+        <div class="draggable-win" id="filter-window" style="top: 405px; left: 15px;">
+            <div id="filter-header" class="window-header">
+                <span><span class="icon">🎛️</span> Filter</span>
+                <button class="window-minimize">−</button>
+            </div>
+            <div class="window-content" style="padding: 20px; overflow-y: auto;">
+                <div class="controls-grid">
                     <div class="control-group">
                         <label>Filter Mode (J)</label>
                         <select class="glass-select skode-control" data-skode="v0 J{val}">
@@ -150,7 +173,18 @@
                         <label>Resonance (Q) <span class="val-display">0.707</span></label>
                         <input type="range" class="glass-slider skode-control" data-skode="v0 Q{val}" min="0.1" max="10" step="0.001" value="0.707">
                     </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- LO-FI WINDOW -->
+        <div class="draggable-win" id="lofi-window" style="top: 635px; left: 15px;">
+            <div id="lofi-header" class="window-header">
+                <span><span class="icon">👾</span> Lo-Fi</span>
+                <button class="window-minimize">−</button>
+            </div>
+            <div class="window-content" style="padding: 20px; overflow-y: auto;">
+                <div class="controls-grid">
                     <div class="control-group">
                         <label>Bit Crush (q) <span class="val-display">0 bits</span></label>
                         <input type="range" class="glass-slider skode-control" data-skode="v0 q{val}" min="0" max="32" step="1" value="0" data-suffix=" bits">
@@ -161,22 +195,58 @@
                         <input type="range" class="glass-slider skode-control" data-skode="v0 h{val}" min="0" max="2" step="0.01" value="0">
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="controls-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
-                    <label class="toggle-container">
-                        <input type="checkbox" id="freeze-check" class="skode-control skode-checkbox" data-skode="DF 1 {val}">
-                        <div class="toggle-btn">❄ Freeze</div>
-                    </label>
-                    <label class="toggle-container">
-                        <input type="checkbox" id="pingpong-check" class="skode-control skode-checkbox" data-skode="DP 1 {val}">
-                        <div class="toggle-btn">⟷ Ping-Pong</div>
-                    </label>
+        <!-- TREMOLO WINDOW -->
+        <div class="draggable-win" id="tremolo-window" style="top: 385px; left: 565px;">
+            <div id="tremolo-header" class="window-header">
+                <span><span class="icon">🌊</span> Tremolo</span>
+                <button class="window-minimize">−</button>
+            </div>
+            <div class="window-content" style="padding: 20px; overflow-y: auto;">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Tremolo Enable</label>
+                        <select class="glass-select ui-state-control am-control" data-ui-key="am_enable" id="am-enable-select">
+                            <option value="0" selected>Off</option>
+                            <option value="1">On</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Waveform</label>
+                        <select class="glass-select ui-state-control am-control" data-ui-key="am_wave" id="am-wave-select">
+                            <option value="0" selected>Sine</option>
+                            <option value="1">Square</option>
+                            <option value="3">Saw</option>
+                            <option value="4">Triangle</option>
+                            <option value="15">Analog Saw</option>
+                            <option value="16">Analog Square</option>
+                            <option value="18">Analog Triangle</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Rate (Hz) <span class="val-display">1.0 Hz</span></label>
+                        <input type="range" class="glass-slider ui-state-control am-control" data-ui-key="am_rate" id="am-rate-slider" min="0.1" max="100" step="0.1" value="1.0" data-suffix=" Hz">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Depth <span class="val-display">1.0</span></label>
+                        <input type="range" class="glass-slider ui-state-control am-control" data-ui-key="am_depth" id="am-depth-slider" min="0.0" max="10.0" step="0.01" value="1.0">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Offset <span class="val-display">0.0</span></label>
+                        <input type="range" class="glass-slider ui-state-control am-control" data-ui-key="am_offset" id="am-offset-slider" min="-1.0" max="1.0" step="0.01" value="0.0">
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- FILE MANAGER WINDOW -->
-        <div class="draggable-win" id="file-window">
+        <div class="draggable-win" id="file-window" style="top: 200px; left: 200px;">
             <div id="file-header" class="window-header">
                 <span>File Manager</span>
                 <div class="header-controls">
@@ -203,7 +273,7 @@
             </div>
         </div>
         <!-- ABOUT WINDOW -->
-        <div class="draggable-win" id="about-window">
+        <div class="draggable-win" id="about-window" style="top: 150px; left: 300px;">
             <div id="about-header" class="window-header">
                 <span>About</span>
                 <div class="header-controls">
@@ -257,7 +327,7 @@
     </div>
     
     <!-- Console Window (REPL) -->
-    <div id="console-overlay" class="draggable-win console-overlay">
+    <div id="console-overlay" class="draggable-win" style="top: 100px; left: 100px;">
         <div id="console-header" class="window-header">
             <span>Skode REPL</span>
             <div class="header-controls">
@@ -287,6 +357,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Dock Bar for minimized windows -->
+    <div id="dock-bar" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 3000; padding: 10px; border-radius: 16px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); display: none;"></div>
 
     <script type="module" src="./src/main.ts"></script>
 </body>

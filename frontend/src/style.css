@@ -97,6 +97,7 @@ body {
     resize: none !important;
     height: auto !important;
     min-height: 0 !important;
+    min-width: 140px !important;
     padding-bottom: 0 !important;
 }
 

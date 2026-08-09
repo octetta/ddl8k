@@ -79,25 +79,52 @@ async function syncGenericControls() {
             await SendSkodeCommand(cmd);
         }
     }
+    await syncTremolo();
+}
+
+async function syncTremolo() {
+    if (!isRunning) return;
+    const enable = (document.getElementById('am-enable-select') as HTMLSelectElement).value;
+    const wave = (document.getElementById('am-wave-select') as HTMLSelectElement).value;
+    const rate = (document.getElementById('am-rate-slider') as HTMLInputElement).value;
+    const depth = (document.getElementById('am-depth-slider') as HTMLInputElement).value;
+    const offset = (document.getElementById('am-offset-slider') as HTMLInputElement).value;
+
+    if (enable === '1') {
+        await SendSkodeCommand(`v1 m1 v1 f${rate} v1 w${wave} v1 a0 v1 l1 v0 A 1,${depth},${offset}`);
+    } else {
+        await SendSkodeCommand('v0 A- v1 l0');
+    }
 }
 
 // Preset System
+interface WindowConfig {
+    left?: string;
+    top?: string;
+    width?: string;
+    height?: string;
+    minimized?: boolean;
+    prevX?: string;
+    prevY?: string;
+    prevW?: string;
+    prevH?: string;
+}
+
 interface Preset {
     name: string;
     values: Record<string, string>;
     readonly: boolean;
 }
 
-// 8 Built-ins, plus 8 User presets
 let presets: Preset[] = [
-    { name: "Slapback", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"8", "DL 1 - - {val}":"0", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"10", "ds v0 {val}":"0.8", "v0 J{val}":"0", "UI_cutoffRange":"full", "v0 K{val}":"15000", "v0 Q{val}":"0.707"} },
-    { name: "Tape/Dub Echo", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"2", "DL 1 - - - - {val}":"4", "DL 1 - - - - - {val}":"11", "ds v0 {val}":"0.7", "v0 J{val}":"11", "UI_cutoffRange":"mids", "v0 K{val}":"2000", "v0 Q{val}":"1.2", "v0 q{val}":"0", "DP 1 {val}":"0"} },
-    { name: "Ambient Wash", readonly: true, values: {"DL 1 {val}":"5", "DL 1 - {val}":"10", "DL 1 - - {val}":"14", "DL 1 - - - {val}":"3", "DL 1 - - - - {val}":"10", "DL 1 - - - - - {val}":"9", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"treble", "v0 K{val}":"4000", "v0 Q{val}":"0.5", "DP 1 {val}":"0"} },
-    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"2", "DL 1 - {val}":"0", "DL 1 - - {val}":"13", "DL 1 - - - {val}":"8", "DL 1 - - - - {val}":"15", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.8", "v0 J{val}":"13", "UI_cutoffRange":"mids", "v0 K{val}":"800", "v0 Q{val}":"3.5", "v0 q{val}":"0"} },
-    { name: "Phase-Shifted Chorus", readonly: true, values: {"DL 1 {val}":"0", "DL 1 - {val}":"3", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"12", "DL 1 - - - - {val}":"22", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.8", "v0 J{val}":"5", "UI_cutoffRange":"full", "v0 K{val}":"2000", "v0 Q{val}":"0.7", "v0 q{val}":"0", "DP 1 {val}":"0"} },
-    { name: "Lo-Fi Telephone", readonly: true, values: {"DL 1 {val}":"3", "DL 1 - {val}":"0", "DL 1 - - {val}":"3", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"1.0", "v0 J{val}":"3", "UI_cutoffRange":"mids", "v0 K{val}":"1500", "v0 Q{val}":"1.5", "v0 q{val}":"10", "DP 1 {val}":"0"} },
-    { name: "Infinite Drone", readonly: true, values: {"DL 1 {val}":"7", "DL 1 - {val}":"15", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"bass", "v0 K{val}":"250", "v0 Q{val}":"0.9", "DP 1 {val}":"0"} },
-    { name: "Rhythmic Ping-Pong", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"11", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.9", "v0 J{val}":"14", "UI_cutoffRange":"treble", "v0 K{val}":"6000", "v0 Q{val}":"1.8", "DP 1 {val}":"1"} }
+    { name: "Slapback", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"8", "DL 1 - - {val}":"0", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"10", "ds v0 {val}":"0.8", "v0 J{val}":"0", "UI_cutoffRange":"full", "v0 K{val}":"15000", "v0 Q{val}":"0.707", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Tape/Dub Echo", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"2", "DL 1 - - - - {val}":"4", "DL 1 - - - - - {val}":"11", "ds v0 {val}":"0.7", "v0 J{val}":"11", "UI_cutoffRange":"mids", "v0 K{val}":"2000", "v0 Q{val}":"1.2", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Ambient Wash", readonly: true, values: {"DL 1 {val}":"5", "DL 1 - {val}":"10", "DL 1 - - {val}":"14", "DL 1 - - - {val}":"3", "DL 1 - - - - {val}":"10", "DL 1 - - - - - {val}":"9", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"treble", "v0 K{val}":"4000", "v0 Q{val}":"0.5", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"2", "DL 1 - {val}":"0", "DL 1 - - {val}":"13", "DL 1 - - - {val}":"8", "DL 1 - - - - {val}":"15", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.8", "v0 J{val}":"13", "UI_cutoffRange":"mids", "v0 K{val}":"800", "v0 Q{val}":"3.5", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Phase-Shifted Chorus", readonly: true, values: {"DL 1 {val}":"0", "DL 1 - {val}":"3", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"12", "DL 1 - - - - {val}":"22", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.8", "v0 J{val}":"5", "UI_cutoffRange":"full", "v0 K{val}":"2000", "v0 Q{val}":"0.7", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Lo-Fi Telephone", readonly: true, values: {"DL 1 {val}":"3", "DL 1 - {val}":"0", "DL 1 - - {val}":"3", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"1.0", "v0 J{val}":"3", "UI_cutoffRange":"mids", "v0 K{val}":"1500", "v0 Q{val}":"1.5", "v0 q{val}":"10", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Infinite Drone", readonly: true, values: {"DL 1 {val}":"7", "DL 1 - {val}":"15", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"bass", "v0 K{val}":"250", "v0 Q{val}":"0.9", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"0", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} },
+    { name: "Rhythmic Ping-Pong", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"11", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.9", "v0 J{val}":"14", "UI_cutoffRange":"treble", "v0 K{val}":"6000", "v0 Q{val}":"1.8", "v0 q{val}":"0", "v0 h{val}":"0", "DF 1 {val}":"0", "DP 1 {val}":"1", "UI_am_enable":"0", "UI_am_wave":"0", "UI_am_rate":"1.0", "UI_am_depth":"1.0"} }
 ];
 // Generate 32 User Presets dynamically
 for (let i = 1; i <= 32; i++) {
@@ -345,6 +372,21 @@ skodeControls.forEach(control => {
     });
 });
 
+// AM Control Listener
+const amControls = document.querySelectorAll('.am-control') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
+amControls.forEach(control => {
+    control.addEventListener('input', async () => {
+        const display = control.parentElement!.querySelector('.val-display');
+        const suffix = control.getAttribute('data-suffix') || '';
+        if (display) {
+            display.textContent = control.value + suffix;
+        }
+        await syncTremolo();
+        saveGlobalConfig();
+        capturePreset();
+    });
+});
+
 // Theme Toggling Logic
 const themeBtn = document.getElementById('theme-toggle')!;
 function toggleTheme() {
@@ -390,6 +432,8 @@ setTimeout(async () => {
 
 const consoleInput = document.getElementById('console-input') as HTMLInputElement;
 
+let highestZIndex = 100;
+
 // Universal Drag and Focus Logic
 function makeDraggable(headerId: string, windowId: string) {
     const header = document.getElementById(headerId)!;
@@ -400,8 +444,8 @@ function makeDraggable(headerId: string, windowId: string) {
 
     // Click anywhere on window to bring to front
     win.addEventListener('mousedown', () => {
-        document.querySelectorAll('.draggable-win').forEach(w => (w as HTMLElement).style.zIndex = '100');
-        win.style.zIndex = '101';
+        highestZIndex++;
+        win.style.zIndex = highestZIndex.toString();
     });
 
     header.addEventListener('mousedown', (e) => {
@@ -435,52 +479,51 @@ let lastSavedConfigStr = "";
 function saveGlobalConfig() {
     clearTimeout(saveConfigTimeout);
     saveConfigTimeout = setTimeout(async () => {
-        const globalWindow = document.getElementById('global-window')!;
-        const controlsWindow = document.getElementById('controls-window')!;
-        const fileWindow = document.getElementById('file-window')!;
-        const aboutWindow = document.getElementById('about-window')!;
-        const replWindow = document.getElementById('console-overlay')!;
-        const config = {
+        const getWin = (id: string): WindowConfig => {
+            const w = document.getElementById(id);
+            if (!w) return {};
+            return {
+                left: w.style.left,
+                top: w.style.top,
+                width: w.style.width,
+                height: w.style.height,
+                minimized: w.classList.contains('minimized'),
+                prevX: w.getAttribute('data-prev-x') || '',
+                prevY: w.getAttribute('data-prev-y') || '',
+                prevW: w.getAttribute('data-prev-w') || '',
+                prevH: w.getAttribute('data-prev-h') || ''
+            }
+        };
+
+        let config: any = {
             theme: document.body.getAttribute('data-theme') || 'light',
-            presets: presets,
-            currentPreset: currentPresetIdx,
+            presets: presets.filter(p => !p.readonly),
+            currentPreset: typeof currentPresetIdx !== 'undefined' ? currentPresetIdx : 0,
             inputDevice: (document.getElementById('input-select') as HTMLSelectElement).value,
             outputDevice: (document.getElementById('output-select') as HTMLSelectElement).value,
             volumes: {
                 main: (document.querySelector('[data-skode="V {val}"]') as HTMLInputElement).value,
                 input: (document.querySelector('[data-skode="v0 a{val} l1"]') as HTMLInputElement).value
             },
-            globalWindow: {
-                top: globalWindow.style.top, left: globalWindow.style.left,
-                width: globalWindow.style.width, height: globalWindow.style.height,
-                minimized: globalWindow.classList.contains('minimized')
-            },
-            controlsWindow: {
-                top: controlsWindow.style.top, left: controlsWindow.style.left,
-                width: controlsWindow.style.width, height: controlsWindow.style.height,
-                minimized: controlsWindow.classList.contains('minimized')
-            },
-            fileWindow: {
-                top: fileWindow.style.top, left: fileWindow.style.left,
-                width: fileWindow.style.width, height: fileWindow.style.height,
-                minimized: fileWindow.classList.contains('minimized')
-            },
-            aboutWindow: {
-                top: aboutWindow.style.top, left: aboutWindow.style.left,
-                width: aboutWindow.style.width, height: aboutWindow.style.height,
-                minimized: aboutWindow.classList.contains('minimized')
-            },
-            replWindow: {
-                top: replWindow.style.top, left: replWindow.style.left,
-                width: replWindow.style.width, height: replWindow.style.height,
-                minimized: replWindow.classList.contains('minimized')
-            }
+            globalWindow: getWin('global-window'),
+            controlsWindow: getWin('controls-window'),
+            filterWindow: getWin('filter-window'),
+            lofiWindow: getWin('lofi-window'),
+            tremoloWindow: getWin('tremolo-window'),
+            fileWindow: getWin('file-window'),
+            aboutWindow: getWin('about-window'),
+            replWindow: getWin('console-overlay')
         };
         
         const configStr = JSON.stringify(config);
         if (configStr !== lastSavedConfigStr) {
             await SaveConfig(configStr);
             lastSavedConfigStr = configStr;
+            const ind = document.getElementById('save-indicator');
+            if (ind) {
+                ind.style.opacity = '1';
+                setTimeout(() => ind.style.opacity = '0', 2000);
+            }
         }
     }, 500);
 }
@@ -488,7 +531,14 @@ function saveGlobalConfig() {
 async function restoreGlobalConfig() {
     try {
         const json = await LoadConfig();
-        if (!json || json === '{}') return;
+        if (!json || json === '{}') {
+            const defaultMin = ['filter-window', 'lofi-window', 'tremolo-window', 'file-window', 'console-overlay', 'about-window'];
+            defaultMin.forEach(id => {
+                const w = document.getElementById(id);
+                if (w) toggleMinimize(w, true);
+            });
+            return;
+        }
         const config = JSON.parse(json);
         
         if (config.theme === 'dark') {
@@ -509,7 +559,7 @@ async function restoreGlobalConfig() {
             }
         }
                
-        const setWin = (id: string, conf: any, defW: string, defH: string) => {
+        const setWin = (id: string, conf: any, defW: string, _defH: string) => {
             const mw = document.getElementById(id);
             if (!mw) return;
             if (!conf) {
@@ -531,34 +581,40 @@ async function restoreGlobalConfig() {
             if (conf.width && parseInt(conf.width) >= parseInt(defW)) {
                 mw.style.width = conf.width;
             } else {
-                mw.style.width = defW;
+                mw.style.width = '';
             }
             if (conf.height && parseInt(conf.height) >= 100) {
                 mw.style.height = conf.height;
             } else {
-                mw.style.height = defH;
+                mw.style.height = '';
             }
+            if (conf.prevX) mw.setAttribute('data-prev-x', conf.prevX);
+            if (conf.prevY) mw.setAttribute('data-prev-y', conf.prevY);
+            if (conf.prevW) mw.setAttribute('data-prev-w', conf.prevW);
+            if (conf.prevH) mw.setAttribute('data-prev-h', conf.prevH);
             if (conf.minimized !== undefined) {
+                // Because toggleMinimize checks if it's already in the target state, 
+                // we first ensure the class doesn't match the target state before calling it,
+                // or just remove the class completely before calling it.
                 if (conf.minimized) {
-                    mw.classList.add('minimized');
-                    const minBtn = mw.querySelector('.window-minimize') as HTMLElement;
-                    if (minBtn) minBtn.innerText = '+';
-                } else {
                     mw.classList.remove('minimized');
-                    const minBtn = mw.querySelector('.window-minimize') as HTMLElement;
-                    if (minBtn) minBtn.innerText = '−';
+                    toggleMinimize(mw, true);
+                } else {
+                    mw.classList.add('minimized');
+                    toggleMinimize(mw, false);
                 }
             } else {
                 if (id === 'file-window' || id === 'console-overlay' || id === 'about-window') {
-                    mw.classList.add('minimized');
-                    const minBtn = mw.querySelector('.window-minimize') as HTMLElement;
-                    if (minBtn) minBtn.innerText = '+';
+                    toggleMinimize(mw, true);
                 }
             }
         };
 
-        setWin('global-window', config.globalWindow, '540px', '280px');
-        setWin('controls-window', config.controlsWindow, '640px', '600px');
+        setWin('global-window', config.globalWindow, '540px', '380px');
+        setWin('controls-window', config.controlsWindow, '400px', '360px');
+        setWin('filter-window', config.filterWindow, '400px', '220px');
+        setWin('lofi-window', config.lofiWindow, '400px', '160px');
+        setWin('tremolo-window', config.tremoloWindow, '400px', '240px');
         setWin('file-window', config.fileWindow, '480px', '220px');
         setWin('about-window', config.aboutWindow, '360px', '460px');
         setWin('console-overlay', config.replWindow, '500px', '400px');
@@ -602,12 +658,79 @@ async function restoreGlobalConfig() {
 }
 
 // Minimize Logic
+function toggleMinimize(win: HTMLElement, forceMin?: boolean) {
+    const isMin = forceMin !== undefined ? forceMin : !win.classList.contains('minimized');
+    if (isMin === win.classList.contains('minimized')) return;
+    
+    const dockBar = document.getElementById('dock-bar')!;
+    
+    if (isMin) {
+        win.classList.add('minimized');
+        win.style.display = 'none';
+        
+        // Add button to dock
+        const dockBtn = document.createElement('button');
+        dockBtn.className = 'glass-btn';
+        dockBtn.id = `dock-${win.id}`;
+        dockBtn.style.whiteSpace = 'nowrap';
+        
+        // Extract title text safely, ignoring icons
+        const titleSpan = win.querySelector('.window-header > span');
+        let titleText = win.id;
+        if (titleSpan) {
+            const clone = titleSpan.cloneNode(true) as HTMLElement;
+            const icon = clone.querySelector('.icon');
+            if (icon) icon.remove();
+            titleText = clone.textContent || win.id;
+        }
+        
+        // Remove the inner auto-saved text if it exists
+        if (titleText.includes('✓')) {
+            titleText = titleText.split('✓')[0];
+        }
+        
+        dockBtn.textContent = titleText.trim();
+        dockBtn.onclick = () => {
+            toggleMinimize(win, false);
+            saveGlobalConfig();
+        };
+        dockBar.appendChild(dockBtn);
+        
+        // Ensure consistent dock order (Alphabetical)
+        Array.from(dockBar.children).sort((a, b) => {
+            const textA = a.textContent || '';
+            const textB = b.textContent || '';
+            return textA.localeCompare(textB);
+        }).forEach(node => dockBar.appendChild(node));
+        
+        dockBar.style.display = 'flex';
+        
+    } else {
+        win.classList.remove('minimized');
+        win.style.display = 'flex';
+        
+        // Remove button from dock
+        const dockBtn = document.getElementById(`dock-${win.id}`);
+        if (dockBtn) {
+            dockBtn.remove();
+        }
+        if (dockBar.children.length === 0) {
+            dockBar.style.display = 'none';
+        }
+        
+        highestZIndex++;
+        win.style.zIndex = highestZIndex.toString();
+    }
+    
+    const minBtn = win.querySelector('.window-minimize') as HTMLElement;
+    if (minBtn) minBtn.innerText = isMin ? '+' : '−';
+}
+
 document.querySelectorAll('.window-minimize').forEach(btn => {
     btn.addEventListener('click', (e) => {
         const win = (e.target as HTMLElement).closest('.draggable-win');
         if (win) {
-            win.classList.toggle('minimized');
-            (e.target as HTMLElement).innerText = win.classList.contains('minimized') ? '+' : '−';
+            toggleMinimize(win as HTMLElement);
             saveGlobalConfig();
         }
     });
@@ -615,6 +738,9 @@ document.querySelectorAll('.window-minimize').forEach(btn => {
 
 makeDraggable('global-header', 'global-window');
 makeDraggable('controls-header', 'controls-window');
+makeDraggable('filter-header', 'filter-window');
+makeDraggable('lofi-header', 'lofi-window');
+makeDraggable('tremolo-header', 'tremolo-window');
 makeDraggable('file-header', 'file-window');
 makeDraggable('about-header', 'about-window');
 
@@ -623,9 +749,7 @@ makeDraggable('console-header', 'console-overlay');
 
 document.addEventListener('keydown', (e) => {
     if (e.key === '`' && e.ctrlKey) {
-        consoleWin.classList.toggle('minimized');
-        const minBtn = consoleWin.querySelector('.window-minimize') as HTMLElement;
-        if (minBtn) minBtn.innerText = consoleWin.classList.contains('minimized') ? '+' : '−';
+        toggleMinimize(consoleWin);
         
         if (!consoleWin.classList.contains('minimized')) {
             document.getElementById('console-input')!.focus();
