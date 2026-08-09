@@ -8,6 +8,8 @@ export function GetAudioInputs():Promise<Array<main.Device>>;
 
 export function GetAudioOutputs():Promise<Array<main.Device>>;
 
+export function GetSkredParameters():Promise<string>;
+
 export function GetSkredVersion():Promise<string>;
 
 export function Greet(arg1:string):Promise<string>;

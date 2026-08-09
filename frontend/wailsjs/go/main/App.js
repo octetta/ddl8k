@@ -14,6 +14,10 @@ export function GetAudioOutputs() {
   return window['go']['main']['App']['GetAudioOutputs']();
 }
 
+export function GetSkredParameters() {
+  return window['go']['main']['App']['GetSkredParameters']();
+}
+
 export function GetSkredVersion() {
   return window['go']['main']['App']['GetSkredVersion']();
 }

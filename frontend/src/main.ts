@@ -1,5 +1,5 @@
 import './style.css';
-import { GetSkredVersion, GetAudioInputs, GetAudioOutputs, RefreshAudioDevices, StartDelayEngine, StopDelayEngine, SendSkodeCommand, ChangeAudioDevice, SaveConfig, LoadConfig, OpenDirectoryDialog, OpenFileDialog } from '../wailsjs/go/main/App';
+import { GetSkredVersion, GetSkredParameters, GetAudioInputs, GetAudioOutputs, RefreshAudioDevices, StartDelayEngine, StopDelayEngine, SendSkodeCommand, ChangeAudioDevice, SaveConfig, LoadConfig, OpenDirectoryDialog, OpenFileDialog } from '../wailsjs/go/main/App';
 import { BrowserOpenURL } from '../wailsjs/runtime/runtime';
 
 let isRunning = false;
@@ -34,6 +34,7 @@ async function loadDevices() {
 }
 
 async function changeDevice() {
+    saveGlobalConfig();
     if (!isRunning) return;
     const inputIdx = parseInt((document.getElementById('input-select') as HTMLSelectElement).value);
     const outputIdx = parseInt((document.getElementById('output-select') as HTMLSelectElement).value);
@@ -47,11 +48,12 @@ async function toggleEngine() {
         const inputIdx = parseInt((document.getElementById('input-select') as HTMLSelectElement).value);
         const outputIdx = parseInt((document.getElementById('output-select') as HTMLSelectElement).value);
         try {
-            await StartDelayEngine(inputIdx, outputIdx);
+            const msg = await StartDelayEngine(inputIdx, outputIdx);
             isRunning = true;
             await syncGenericControls();
             btn.innerText = '⏹ Stop Delay';
             btn.classList.add('active');
+            addOutput(`--- ${msg} ---`, false);
         } catch (e) {
             console.error(e);
             alert("Error starting engine: " + e);
@@ -61,6 +63,7 @@ async function toggleEngine() {
         isRunning = false;
         btn.innerText = '▶ Start Delay';
         btn.classList.remove('active');
+        addOutput('--- Engine Stopped ---', false);
     }
 }
 
@@ -85,27 +88,32 @@ interface Preset {
     readonly: boolean;
 }
 
-// 4 Built-ins from the Patchbook, plus 4 User presets
+// 8 Built-ins, plus 8 User presets
 let presets: Preset[] = [
-    { name: "Slapback", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"8", "DL 1 - - {val}":"0", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"10", "v0 J{val}":"0", "ds v0 {val}":"0.8"} },
-    { name: "Tape/Dub Echo", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"2", "DL 1 - - - - {val}":"4", "DL 1 - - - - - {val}":"11", "v0 J{val}":"1", "v0 K{val}":"5000", "ds v0 {val}":"0.7"} },
-    { name: "Ambient Wash", readonly: true, values: {"DL 1 {val}":"5", "DL 1 - {val}":"10", "DL 1 - - {val}":"14", "DL 1 - - - {val}":"3", "DL 1 - - - - {val}":"10", "DL 1 - - - - - {val}":"9", "ds v0 {val}":"1.0"} },
-    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"2", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"20", "DL 1 - - - - {val}":"28", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.9"} },
-    { name: "User 1", readonly: false, values: {} },
-    { name: "User 2", readonly: false, values: {} },
-    { name: "User 3", readonly: false, values: {} },
-    { name: "User 4", readonly: false, values: {} }
+    { name: "Slapback", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"8", "DL 1 - - {val}":"0", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"10", "ds v0 {val}":"0.8", "v0 J{val}":"0", "UI_cutoffRange":"full", "v0 K{val}":"15000", "v0 Q{val}":"0.707"} },
+    { name: "Tape/Dub Echo", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"2", "DL 1 - - - - {val}":"4", "DL 1 - - - - - {val}":"11", "ds v0 {val}":"0.7", "v0 J{val}":"11", "UI_cutoffRange":"mids", "v0 K{val}":"2000", "v0 Q{val}":"1.2", "v0 q{val}":"0", "DP 1 {val}":"0"} },
+    { name: "Ambient Wash", readonly: true, values: {"DL 1 {val}":"5", "DL 1 - {val}":"10", "DL 1 - - {val}":"14", "DL 1 - - - {val}":"3", "DL 1 - - - - {val}":"10", "DL 1 - - - - - {val}":"9", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"treble", "v0 K{val}":"4000", "v0 Q{val}":"0.5", "DP 1 {val}":"0"} },
+    { name: "Dub Siren", readonly: true, values: {"DL 1 {val}":"1", "DL 1 - {val}":"2", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"20", "DL 1 - - - - {val}":"28", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"0.9", "v0 J{val}":"23", "UI_cutoffRange":"mids", "v0 K{val}":"1200", "v0 Q{val}":"4.5", "v0 q{val}":"4"} },
+    { name: "Phase-Shifted Chorus", readonly: true, values: {"DL 1 {val}":"0", "DL 1 - {val}":"3", "DL 1 - - {val}":"10", "DL 1 - - - {val}":"12", "DL 1 - - - - {val}":"22", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.8", "v0 J{val}":"5", "UI_cutoffRange":"full", "v0 K{val}":"2000", "v0 Q{val}":"0.7", "v0 q{val}":"0", "DP 1 {val}":"0"} },
+    { name: "Lo-Fi Telephone", readonly: true, values: {"DL 1 {val}":"3", "DL 1 - {val}":"0", "DL 1 - - {val}":"3", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"14", "ds v0 {val}":"1.0", "v0 J{val}":"3", "UI_cutoffRange":"mids", "v0 K{val}":"1500", "v0 Q{val}":"1.5", "v0 q{val}":"10", "DP 1 {val}":"0"} },
+    { name: "Infinite Drone", readonly: true, values: {"DL 1 {val}":"7", "DL 1 - {val}":"15", "DL 1 - - {val}":"15", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"1.0", "v0 J{val}":"1", "UI_cutoffRange":"bass", "v0 K{val}":"250", "v0 Q{val}":"0.9", "DP 1 {val}":"0"} },
+    { name: "Rhythmic Ping-Pong", readonly: true, values: {"DL 1 {val}":"4", "DL 1 - {val}":"0", "DL 1 - - {val}":"11", "DL 1 - - - {val}":"0", "DL 1 - - - - {val}":"0", "DL 1 - - - - - {val}":"12", "ds v0 {val}":"0.9", "v0 J{val}":"14", "UI_cutoffRange":"treble", "v0 K{val}":"6000", "v0 Q{val}":"1.8", "DP 1 {val}":"1"} }
 ];
+// Generate 32 User Presets dynamically
+for (let i = 1; i <= 32; i++) {
+    presets.push({ name: `User ${i}`, readonly: false, values: {} });
+}
 let currentPresetIdx = 0;
 
 // Capture default state on boot for fallback
 const defaultState: Record<string, string> = {};
-const initialControls = document.querySelectorAll('.skode-control:not([data-no-preset="true"])') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
+const initialControls = document.querySelectorAll('.skode-control:not([data-no-preset="true"]), .ui-state-control') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
 initialControls.forEach(c => {
+    const key = c.classList.contains('ui-state-control') ? `UI_${c.getAttribute('data-ui-key')}` : c.getAttribute('data-skode')!;
     if (c.type === 'checkbox') {
-        defaultState[c.getAttribute('data-skode')!] = (c as HTMLInputElement).checked ? '1' : '0';
+        defaultState[key] = (c as HTMLInputElement).checked ? '1' : '0';
     } else {
-        defaultState[c.getAttribute('data-skode')!] = c.value;
+        defaultState[key] = c.value;
     }
 });
 
@@ -118,15 +126,16 @@ function updatePresetSelect() {
         opt.textContent = `${p.readonly ? '[Factory] ' : ''}${p.name}`;
         sel.appendChild(opt);
     });
+    
     sel.value = currentPresetIdx.toString();
 }
 
 function capturePreset() {
     if (presets[currentPresetIdx].readonly) return; // Don't overwrite factory defaults
     const state: Record<string, string> = {};
-    const controls = document.querySelectorAll('.skode-control:not([data-no-preset="true"])') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
+    const controls = document.querySelectorAll('.skode-control:not([data-no-preset="true"]), .ui-state-control') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
     controls.forEach(c => {
-        const key = c.getAttribute('data-skode')!;
+        const key = c.classList.contains('ui-state-control') ? `UI_${c.getAttribute('data-ui-key')}` : c.getAttribute('data-skode')!;
         if (c.type === 'checkbox') {
             state[key] = (c as HTMLInputElement).checked ? '1' : '0';
         } else {
@@ -140,24 +149,38 @@ function capturePreset() {
 async function loadPreset(idx: number) {
     currentPresetIdx = idx;
     const state = presets[idx].values;
-    const controls = document.querySelectorAll('.skode-control:not([data-no-preset="true"])') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
+    const controls = document.querySelectorAll('.skode-control:not([data-no-preset="true"]), .ui-state-control') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
     
     // Disable sending commands while we update the UI
     const wasRunning = isRunning;
     isRunning = false; 
 
+    // Update UI controls first so they can affect skode control limits if needed
     for (const c of Array.from(controls)) {
-        const key = c.getAttribute('data-skode')!;
-        const valToSet = state[key] !== undefined ? state[key] : defaultState[key];
-        if (valToSet !== undefined) {
-            if (c.type === 'checkbox') {
-                (c as HTMLInputElement).checked = valToSet === '1';
-            } else {
+        if (c.classList.contains('ui-state-control')) {
+            const key = `UI_${c.getAttribute('data-ui-key')}`;
+            const valToSet = state[key] !== undefined ? state[key] : defaultState[key];
+            if (valToSet !== undefined) {
                 c.value = valToSet;
-                // update display
-                const display = c.parentElement!.querySelector('.val-display');
-                const suffix = c.getAttribute('data-suffix') || '';
-                if (display) display.textContent = c.value + suffix;
+                c.dispatchEvent(new Event('change')); // Trigger any dependent logic (e.g. Cutoff Range)
+            }
+        }
+    }
+
+    for (const c of Array.from(controls)) {
+        if (c.classList.contains('skode-control')) {
+            const key = c.getAttribute('data-skode')!;
+            const valToSet = state[key] !== undefined ? state[key] : defaultState[key];
+            if (valToSet !== undefined) {
+                if (c.type === 'checkbox') {
+                    (c as HTMLInputElement).checked = valToSet === '1';
+                } else {
+                    c.value = valToSet;
+                    // update display
+                    const display = c.parentElement!.querySelector('.val-display');
+                    const suffix = c.getAttribute('data-suffix') || '';
+                    if (display) display.textContent = c.value + suffix;
+                }
             }
         }
     }
@@ -169,8 +192,25 @@ async function loadPreset(idx: number) {
 }
 
 document.getElementById('preset-select')!.addEventListener('change', (e) => {
+    const val = (e.target as HTMLSelectElement).value;
     capturePreset(); // save current to old index
-    loadPreset(parseInt((e.target as HTMLSelectElement).value));
+    loadPreset(parseInt(val));
+});
+
+document.getElementById('copy-preset-btn')!.addEventListener('click', () => {
+    // Find first empty user slot
+    let targetIdx = presets.findIndex(p => !p.readonly && Object.keys(p.values).length === 0);
+    if (targetIdx === -1) {
+        // Fallback to first user slot if all are taken
+        targetIdx = presets.findIndex(p => !p.readonly);
+    }
+    if (targetIdx === -1) return; // Should never happen unless zero user slots
+    
+    // Copy current UI state into targetIdx
+    presets[targetIdx].name = presets[currentPresetIdx].name + " (Copy)";
+    currentPresetIdx = targetIdx; 
+    capturePreset(); // This saves current UI state directly into the new active user slot
+    updatePresetSelect();
 });
 
 // Setup initial preset state
@@ -250,6 +290,38 @@ document.getElementById('refresh-devices-btn')!.addEventListener('click', async 
 });
 document.getElementById('toggle-btn')!.addEventListener('click', toggleEngine);
 
+    const slider = document.getElementById('filter-cutoff-slider') as HTMLInputElement;
+    document.getElementById('cutoff-range-select')!.addEventListener('change', (e) => {
+        const val = (e.target as HTMLSelectElement).value;
+        const currentVal = parseInt(slider.value);
+        if (val === 'bass') {
+            slider.min = "20";
+            slider.max = "300";
+            slider.step = "1";
+        } else if (val === 'mids') {
+            slider.min = "300";
+            slider.max = "3000";
+            slider.step = "10";
+        } else if (val === 'treble') {
+            slider.min = "3000";
+            slider.max = "20000";
+            slider.step = "10";
+        } else {
+            slider.min = "20";
+            slider.max = "20000";
+            slider.step = "10";
+        }
+        
+        // Clamp current value to new bounds
+        if (currentVal > parseInt(slider.max)) slider.value = slider.max;
+        if (currentVal < parseInt(slider.min)) slider.value = slider.min;
+        
+        // Update display text and trigger Skode update
+        slider.dispatchEvent(new Event('input'));
+        slider.dispatchEvent(new Event('change'));
+        capturePreset();
+    });
+
 // Generic Data-Driven UI Event Listener
 const skodeControls = document.querySelectorAll('.skode-control') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
 skodeControls.forEach(control => {
@@ -293,14 +365,14 @@ themeBtn.addEventListener('click', toggleTheme);
 })();
 
 
-const consoleOutput = document.getElementById('console-output')!;
-const addOutput = (text: string, isCmd: boolean = false) => {
+function addOutput(text: string, isCmd: boolean = false) {
+    const consoleOutput = document.getElementById('console-output')!;
     const div = document.createElement('div');
     div.className = isCmd ? 'console-cmd-line' : 'console-res-line';
     div.textContent = isCmd ? `> ${text}` : text;
     consoleOutput.appendChild(div);
     consoleOutput.scrollTop = consoleOutput.scrollHeight;
-};
+}
 
 // Initial welcome msg
 addOutput('Pulp Skode REPL initialized.\nPress Ctrl+` to toggle.', false);
@@ -310,6 +382,9 @@ setTimeout(async () => {
     try {
         const v = await GetSkredVersion();
         if (v) document.getElementById('skred-ver-display')!.innerText = `Skred Version: ${v}`;
+        
+        const params = await GetSkredParameters();
+        if (params) addOutput(params, false);
     } catch(e) {}
 }, 500);
 
@@ -356,6 +431,7 @@ function makeDraggable(headerId: string, windowId: string) {
 
 // Global Config Logic
 let saveConfigTimeout: any;
+let lastSavedConfigStr = "";
 function saveGlobalConfig() {
     clearTimeout(saveConfigTimeout);
     saveConfigTimeout = setTimeout(async () => {
@@ -400,7 +476,12 @@ function saveGlobalConfig() {
                 minimized: replWindow.classList.contains('minimized')
             }
         };
-        await SaveConfig(JSON.stringify(config));
+        
+        const configStr = JSON.stringify(config);
+        if (configStr !== lastSavedConfigStr) {
+            await SaveConfig(configStr);
+            lastSavedConfigStr = configStr;
+        }
     }, 500);
 }
 
@@ -416,7 +497,17 @@ async function restoreGlobalConfig() {
             document.body.removeAttribute('data-theme');
         }
         
-        if (config.presets) presets = config.presets;
+        if (config.presets) {
+            // Restore only user presets from saved config to prevent overwriting updated factory defaults
+            const loadedUserPresets = config.presets.filter((p: any) => !p.readonly);
+            let userIdx = 0;
+            for (let i = 0; i < presets.length; i++) {
+                if (!presets[i].readonly && userIdx < loadedUserPresets.length) {
+                    presets[i] = loadedUserPresets[userIdx];
+                    userIdx++;
+                }
+            }
+        }
                
         const setWin = (id: string, conf: any, defW: string, defH: string) => {
             const mw = document.getElementById(id);
@@ -479,14 +570,34 @@ async function restoreGlobalConfig() {
             if (inputV) inputV.value = config.volumes.input;
         }
         
+        if (config.inputDevice !== undefined) {
+            const inSel = document.getElementById('input-select') as HTMLSelectElement;
+            if (inSel) inSel.value = config.inputDevice;
+        }
+        
+        if (config.outputDevice !== undefined) {
+            const outSel = document.getElementById('output-select') as HTMLSelectElement;
+            if (outSel) outSel.value = config.outputDevice;
+        }
+        
         updatePresetSelect();
         if (config.currentPreset !== undefined && config.currentPreset >= 0 && config.currentPreset < presets.length) {
             currentPresetIdx = config.currentPreset;
             (document.getElementById('preset-select') as HTMLSelectElement).value = currentPresetIdx.toString();
             loadPreset(currentPresetIdx);
         }
+        
+        // Seed initial cache to prevent immediate redundant saves
+        lastSavedConfigStr = json;
     } catch(e) {
         console.error("Failed to load config:", e);
+    }
+    
+    // Always ensure global window starts on top
+    const globalWin = document.getElementById('global-window');
+    if (globalWin) {
+        document.querySelectorAll('.draggable-win').forEach(w => (w as HTMLElement).style.zIndex = '100');
+        globalWin.style.zIndex = '102';
     }
 }
 
@@ -563,6 +674,14 @@ consoleInput.addEventListener('keydown', async (e) => {
             try {
                 const res = await SendSkodeCommand(cmd);
                 addOutput(res, false);
+                if (cmd.startsWith('.restart') || cmd.startsWith('-restart')) {
+                    if (isRunning) {
+                        const inputIdx = parseInt((document.getElementById('input-select') as HTMLSelectElement).value);
+                        const outputIdx = parseInt((document.getElementById('output-select') as HTMLSelectElement).value);
+                        const msg = await ChangeAudioDevice(inputIdx, outputIdx);
+                        addOutput(`--- ${msg} ---`, false);
+                    }
+                }
             } catch (err) {
                 addOutput(`Error: ${err}`, false);
             }

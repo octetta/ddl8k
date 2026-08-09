@@ -23,6 +23,7 @@
                     <div style="display:flex; gap:8px; align-items:center;">
                         <select id="preset-select" class="glass-select" style="flex-grow:1; margin-top:0;">
                         </select>
+                        <button id="copy-preset-btn" class="glass-btn" title="Copy current state to an empty User Preset">Copy</button>
                         <button id="rename-preset-btn" class="glass-btn">Rename</button>
                         <button id="save-presets-btn" class="glass-btn">Save</button>
                         <button id="load-presets-btn" class="glass-btn">Load</button>
@@ -108,15 +109,41 @@
                     <div class="control-group">
                         <label>Filter Mode (J)</label>
                         <select class="glass-select skode-control" data-skode="v0 J{val}">
-                            <option value="0">Off</option>
-                            <option value="1" selected>Low Pass (LPF)</option>
-                            <option value="2">High Pass (HPF)</option>
+                            <optgroup label="Clean (Standard)">
+                                <option value="0">Off</option>
+                                <option value="1" selected>Low Pass (LPF)</option>
+                                <option value="2">High Pass (HPF)</option>
+                                <option value="3">Band Pass (BPF)</option>
+                                <option value="4">Notch / Reject</option>
+                                <option value="5">Allpass (Phase)</option>
+                            </optgroup>
+                            <optgroup label="Driven (Saturated)">
+                                <option value="11">Driven Low Pass</option>
+                                <option value="12">Driven High Pass</option>
+                                <option value="13">Driven Band Pass</option>
+                                <option value="14">Driven Notch</option>
+                            </optgroup>
+                            <optgroup label="Screamer (Aggressive Resonance)">
+                                <option value="21">Screamer Low Pass</option>
+                                <option value="22">Screamer High Pass</option>
+                                <option value="23">Screamer Band Pass</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Cutoff Range</label>
+                        <select class="glass-select ui-state-control" data-ui-key="cutoffRange" id="cutoff-range-select">
+                            <option value="full" selected>Full (20 - 20000 Hz)</option>
+                            <option value="bass">Bass (20 - 300 Hz)</option>
+                            <option value="mids">Mids (300 - 3000 Hz)</option>
+                            <option value="treble">Treble (3000 - 20000 Hz)</option>
                         </select>
                     </div>
 
                     <div class="control-group">
                         <label>Cutoff Freq (K) <span class="val-display">15000 Hz</span></label>
-                        <input type="range" class="glass-slider skode-control" data-skode="v0 K{val}" min="20" max="20000" step="10" value="15000" data-suffix=" Hz">
+                        <input type="range" class="glass-slider skode-control" id="filter-cutoff-slider" data-skode="v0 K{val}" min="20" max="20000" step="10" value="15000" data-suffix=" Hz">
                     </div>
 
                     <div class="control-group">

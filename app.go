@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -64,7 +65,14 @@ func (a *App) StartDelayEngine(inputIdx, outputIdx int) string {
 	// l1 triggers the voice envelope.
 	SendCommand("v0 w7 r1 ds1 l1")
 	
-	return "Started"
+	frames := "128 (default)"
+	if f := os.Getenv("SKRED_FRAMES"); f != "" { frames = f }
+	voices := "16 (default)"
+	if v := os.Getenv("SKRED_VOICES"); v != "" { voices = v }
+	port := "0 (default)"
+	if p := os.Getenv("SKRED_PORT"); p != "" { port = p }
+
+	return fmt.Sprintf("Engine Started.\nParameters -> port: %s | frames: %s | voices: %s | in: %d | out: %d", port, frames, voices, inputIdx, outputIdx)
 }
 
 // StopDelayEngine stops processing
@@ -97,6 +105,39 @@ func (a *App) ToggleFreeze(frozen bool) {
 
 // SendSkodeCommand sends a raw skode command to the engine and returns the response
 func (a *App) SendSkodeCommand(cmd string) string {
+	cmdTrimmed := strings.TrimSpace(cmd)
+	if strings.HasPrefix(cmdTrimmed, ".restart") || strings.HasPrefix(cmdTrimmed, "-restart") {
+		parts := strings.Fields(cmdTrimmed)
+		for _, part := range parts[1:] {
+			if strings.HasPrefix(part, "port=") {
+				os.Setenv("SKRED_PORT", strings.TrimPrefix(part, "port="))
+			} else if strings.HasPrefix(part, "frames=") {
+				os.Setenv("SKRED_FRAMES", strings.TrimPrefix(part, "frames="))
+			} else if strings.HasPrefix(part, "voices=") {
+				os.Setenv("SKRED_VOICES", strings.TrimPrefix(part, "voices="))
+			}
+		}
+		
+		// Stop the current engine
+		StopAudioEngine()
+		
+		// Wait and restart it
+		err := StartAudioEngine()
+		if err != nil {
+			return "Failed to restart Skred: " + err.Error()
+		}
+		
+		// Read back parameters for confirmation message
+		frames := "128 (default)"
+		if f := os.Getenv("SKRED_FRAMES"); f != "" { frames = f }
+		voices := "4 (default)"
+		if v := os.Getenv("SKRED_VOICES"); v != "" { voices = v }
+		port := "0 (default)"
+		if p := os.Getenv("SKRED_PORT"); p != "" { port = p }
+
+		return fmt.Sprintf("Skred restarted successfully.\nParameters -> port: %s | frames: %s | voices: %s\nNote: You may need to toggle the Start/Stop UI button to re-sync audio device routing.", port, frames, voices)
+	}
+
 	return SendCommand(cmd)
 }
 
@@ -105,7 +146,7 @@ func (a *App) ChangeAudioDevice(inputIdx, outputIdx int) string {
 	SelectAudioDevices(outputIdx, inputIdx)
 	SendCommand(fmt.Sprintf("/ai %d", inputIdx))
 	SendCommand(fmt.Sprintf("/ao %d", outputIdx))
-	return "Changed"
+	return fmt.Sprintf("Audio device changed -> in: %d | out: %d", inputIdx, outputIdx)
 }
 
 // SetInputVolume sets the amplitude of voice 0 in decibels
@@ -160,4 +201,16 @@ func (a *App) OpenFileDialog() string {
 
 func (a *App) GetSkredVersion() string {
 	return GetSkredVersionStr()
+}
+
+// GetSkredParameters returns the active environment parameters for the frontend
+func (a *App) GetSkredParameters() string {
+	frames := "128 (default)"
+	if f := os.Getenv("SKRED_FRAMES"); f != "" { frames = f }
+	voices := "4 (default)"
+	if v := os.Getenv("SKRED_VOICES"); v != "" { voices = v }
+	port := "0 (default)"
+	if p := os.Getenv("SKRED_PORT"); p != "" { port = p }
+
+	return fmt.Sprintf("Environment -> port: %s | frames: %s | voices: %s", port, frames, voices)
 }

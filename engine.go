@@ -11,6 +11,8 @@ package main
 import "C"
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"unsafe"
 )
 
@@ -50,10 +52,33 @@ func GetAudioDevices(isCapture bool) []Device {
 	return devices
 }
 
+var engineRunning bool = false
+
 func StartAudioEngine() error {
-	if C.skred_start(128, 16, 0) != 0 {
+	if engineRunning {
+		// Stop it first to cleanly restart if already running
+		StopAudioEngine()
+	}
+
+	frames := 128
+	voices := 4
+	port := 0
+
+	if f, err := strconv.Atoi(os.Getenv("SKRED_FRAMES")); err == nil {
+		frames = f
+	}
+	if v, err := strconv.Atoi(os.Getenv("SKRED_VOICES")); err == nil {
+		voices = v
+	}
+	if p, err := strconv.Atoi(os.Getenv("SKRED_PORT")); err == nil {
+		port = p
+	}
+
+	if C.skred_start(C.uint(frames), C.uint(voices), C.int(port)) != 0 {
 		return fmt.Errorf("skred_start failed")
 	}
+	engineRunning = true
+
 	// Setup the digital delay line (skode)
 	// Create a simple delay loop in skode
 	// We'll configure a delay line on a voice or a track
@@ -62,7 +87,11 @@ func StartAudioEngine() error {
 }
 
 func StopAudioEngine() {
+	if !engineRunning {
+		return
+	}
 	C.skred_stop()
+	engineRunning = false
 }
 
 func SelectAudioDevices(playbackIdx, captureIdx int) {
